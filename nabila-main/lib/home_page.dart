@@ -118,7 +118,33 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
-          : buildProductListView(),
+          : Column(
+              children: [
+                const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text(
+                    'Your Products (Grid View)',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                SizedBox(
+                  height: 200,
+                  child: buildGridView(),
+                ),
+                const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text(
+                    'Your Products (List View)',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                Expanded(
+                  child: buildProductListView(),
+                ),
+              ],
+            ),
       bottomNavigationBar: BottomNavigationBar(
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
@@ -137,33 +163,86 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Widget buildGridView() {
+    return GridView.builder(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.all(8.0),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 1,
+        mainAxisSpacing: 8.0,
+        childAspectRatio: 1.5,
+      ),
+      itemCount: products.length,
+      itemBuilder: (context, index) {
+        final product = products[index];
+        return Card(
+          color: Colors.blueAccent,
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  product['prod_name'],
+                  style: const TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  product['prod_desc'],
+                  style: const TextStyle(fontSize: 12, color: Colors.white70),
+                  textAlign: TextAlign.center,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.edit, color: Colors.blue),
+                      onPressed: () => showProductDialog(product: product),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete, color: Colors.red),
+                      onPressed: () => deleteProduct(product['id']),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   Widget buildProductListView() {
     return ListView.builder(
       padding: const EdgeInsets.all(8.0),
       itemCount: products.length,
       itemBuilder: (context, index) {
         final product = products[index];
-        return ListTile(
-          leading: Icon(
-            Icons.shopping_cart,
-            color: Theme.of(context).primaryColor,
-          ),
-          title: Text(product['prod_name']),
-          subtitle: Text(product['prod_desc']),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.edit, color: Colors.blue),
-                onPressed: () => showProductDialog(
-                  product: product,
+        return Card(
+          margin: const EdgeInsets.symmetric(vertical: 5.0),
+          child: ListTile(
+            leading: Icon(
+              Icons.shopping_cart,
+              color: Theme.of(context).primaryColor,
+            ),
+            title: Text(product['prod_name']),
+            subtitle: Text(product['prod_desc']),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.edit, color: Colors.blue),
+                  onPressed: () => showProductDialog(product: product),
                 ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.delete, color: Colors.red),
-                onPressed: () => deleteProduct(product['id']),
-              ),
-            ],
+                IconButton(
+                  icon: const Icon(Icons.delete, color: Colors.red),
+                  onPressed: () => deleteProduct(product['id']),
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -192,7 +271,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               TextField(
                 controller: priceController,
-                decoration: const InputDecoration(labelText: 'Budget'),
+                decoration: const InputDecoration(labelText: 'Price'),
                 keyboardType: TextInputType.number,
               ),
               TextField(
